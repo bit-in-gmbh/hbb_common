@@ -42,9 +42,7 @@ libc = "0.2"
 dlopen = "0.1"
 toml = "0.7"
 uuid = { version = "1.16", features = ["v4"] }
-# new sysinfo issue: https://github.com/rustdesk/rustdesk/pull/6330#issuecomment-2270871442
-sysinfo = { git = "https://github.com/rustdesk-org/sysinfo", branch = "rlim_max" }
-# new flexi_logger failed on nightly rustc 1.75 for x86
+sysinfo = "=0.36.1"
 thiserror = "1.0"
 httparse = "1.10"
 base64 = "0.22"
@@ -58,8 +56,16 @@ tokio-rustls = { version = "0.26", features = [
     "ring",
 ], default-features = false }
 tokio-native-tls = "0.3"
-tokio-tungstenite = { version = "0.26", features = ["native-tls", "rustls-tls-native-roots", "rustls-tls-webpki-roots"] }
-tungstenite = { version = "0.26", features = ["native-tls", "rustls-tls-native-roots", "rustls-tls-webpki-roots"] }
+tokio-tungstenite = { version = "0.26", features = [
+    "native-tls",
+    "rustls-tls-native-roots",
+    "rustls-tls-webpki-roots",
+] }
+tungstenite = { version = "0.26", features = [
+    "native-tls",
+    "rustls-tls-native-roots",
+    "rustls-tls-webpki-roots",
+] }
 rustls-platform-verifier = "0.6"
 rustls-pki-types = "1.11"
 rustls-native-certs = "0.8"

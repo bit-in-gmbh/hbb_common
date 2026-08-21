@@ -76,6 +76,34 @@ pub use x11;
 
 pub type SessionID = uuid::Uuid;
 
+pub fn refresh_processes(system: &mut sysinfo::System) -> usize {
+    #[cfg(target_os = "linux")]
+    {
+        use std::sync::Once;
+
+        static LIMIT_OPEN_FILES: Once = Once::new();
+        LIMIT_OPEN_FILES.call_once(|| unsafe {
+            const MAX_OPEN_FILES: libc::rlim_t = 1_048_576;
+            let mut limits = libc::rlimit {
+                rlim_cur: 0,
+                rlim_max: 0,
+            };
+            if libc::getrlimit(libc::RLIMIT_NOFILE, &mut limits) != 0 {
+                log::warn!("Failed to read RLIMIT_NOFILE before refreshing processes");
+                return;
+            }
+            if limits.rlim_max > MAX_OPEN_FILES {
+                limits.rlim_cur = MAX_OPEN_FILES;
+                limits.rlim_max = MAX_OPEN_FILES;
+                if libc::setrlimit(libc::RLIMIT_NOFILE, &limits) != 0 {
+                    log::warn!("Failed to cap RLIMIT_NOFILE before refreshing processes");
+                }
+            }
+        });
+    }
+    system.refresh_processes(sysinfo::ProcessesToUpdate::All, true)
+}
+
 #[inline]
 pub async fn sleep(sec: f32) {
     tokio::time::sleep(time::Duration::from_secs_f32(sec)).await;
@@ -496,9 +524,8 @@ pub fn version_check_request(typ: String) -> (VersionCheckRequest, String) {
     const URL: &str = "https://api.rustdesk.com/version/latest";
 
     use sysinfo::System;
-    let system = System::new();
-    let os = system.distribution_id();
-    let os_version = system.os_version().unwrap_or_default();
+    let os = System::distribution_id();
+    let os_version = System::os_version().unwrap_or_default();
     let arch = std::env::consts::ARCH.to_string();
     #[allow(deprecated)]
     let device_id = fingerprint::get_fingerprint(None, None);

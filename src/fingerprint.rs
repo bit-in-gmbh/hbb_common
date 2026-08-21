@@ -197,7 +197,7 @@ static mut CACHED_FINGERPRINTS: Option<HashMap<String, Vec<u8>>> = None;
 impl FingerprintingInfo {
     fn new() -> Self {
         let mut sys = System::new();
-        sys.refresh_cpu();
+        sys.refresh_cpu_all();
         let cpu = sys.cpus().first();
         let id = {
             let mut id = crate::config::Config::get_id();
@@ -218,7 +218,7 @@ impl FingerprintingInfo {
                 .map(|cpu| cpu.frequency().to_string())
                 .unwrap_or_default(),
             cores: sys.cpus().len().to_string(),
-            physical_cores: sys.physical_core_count().unwrap_or(1).to_string(),
+            physical_cores: System::physical_core_count().unwrap_or(1).to_string(),
             mem_total: sys.total_memory().to_string(),
             platform: std::env::consts::OS.to_string(),
             arch: std::env::consts::ARCH.to_string(),
